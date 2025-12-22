@@ -1,0 +1,36 @@
+model:
+  name: "hatmimoha/arabic-ner"
+  aggregation_strategy: "first"
+  token: null  
+
+preprocessing:
+  arabic_stopwords_extension:
+    - "غيرها"
+    - "هي"
+    - "هو"
+    - "هما"
+    - "عندما"
+  normalization_map:
+    "أ": "ا"
+    "إ": "ا"
+    "آ": "ا"
+    "ة": "ه"
+    "ؤ": "و"
+    "ئ": "ي"
+
+embeddings:
+  word2vec:
+    vector_size: 100
+    window: 5
+    min_count: 1
+    workers: 4
+    seed: 42
+  pca:
+    n_components: 50
+
+random_seed: 42
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
