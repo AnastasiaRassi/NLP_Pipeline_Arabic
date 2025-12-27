@@ -20,29 +20,19 @@ except LookupError:
     )
 
 
-class ArabicPreprocessor:
-    """Preprocessor for Arabic text with normalization and cleaning."""
-    
+class ArabicPreprocessor:    
     def __init__(self, config: Dict):
-        """Initialize preprocessor with configuration.
-        
-        Args:
-            config: Configuration dictionary containing preprocessing settings.
-        """
         self.config = config
         self._load_stopwords()
         self._setup_normalization()
         self._compile_patterns()
     
     def _load_stopwords(self) -> None:
-        """Load and configure Arabic stopwords.
-
-        Combines:
+        """Loads and configures Arabic stopwords. Combines:
         - NLTK's built-in Arabic stopword list
         - stopwords from `stop_words_arabic.txt` at the project root, 
             source: https://github.com/mohataher/arabic-stop-words
         """
-        # Resolve project root (one level above `src`)
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         custom_path = os.path.join(project_root, "stop_words_arabic.txt")
 
@@ -75,43 +65,26 @@ class ArabicPreprocessor:
         )
     
     def _setup_normalization(self) -> None:
-        """Setup Arabic character normalization mapping."""
         self.normalization_map = dict(
             self.config.get("preprocessing", {}).get("normalization_map", {})
         )
 
     def _compile_patterns(self) -> None:
-        """Compile regex patterns for efficiency."""
         self.arabic_diacritics = re.compile(r"[\u0617-\u061A\u064B-\u0652]")
         self.punctuation_pattern = re.compile(r'[^\w\s]')
     
     def preprocess(self, text: str) -> str:
-        """Preprocess Arabic text: remove stopwords, diacritics, normalize.
-        
-        Args:
-            text: Input Arabic text.
-            
-        Returns:
-            Preprocessed text.
-            
-        Raises:
-            ValueError: If input text is empty or invalid.
-        """
         if not text or not isinstance(text, str):
             raise ValueError("Input text must be a non-empty string")
         
-        # Tokenize and remove stopwords
         tokens = text.split()
         tokens = [word for word in tokens if word not in self.arabic_stopwords]
         
-        # Join and remove diacritics
         text = " ".join(tokens)
         text = re.sub(self.arabic_diacritics, '', text)
         
-        # Remove punctuation
         text = re.sub(self.punctuation_pattern, '', text)
         
-        # Normalize Arabic characters
         for key, value in self.normalization_map.items():
             text = text.replace(key, value)
         
@@ -120,15 +93,6 @@ class ArabicPreprocessor:
 
 
 def preprocess_arabic(text: str, config: Dict) -> str:
-    """Direct function for Arabic text preprocessing.
-    
-    Args:
-        text: Input Arabic text.
-        config: Configuration dictionary.
-        
-    Returns:
-        Preprocessed text.
-    """
     preprocessor = ArabicPreprocessor(config)
     return preprocessor.preprocess(text)
 

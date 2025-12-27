@@ -1,5 +1,3 @@
-"""Main entry point for Arabic NLP pipeline."""
-
 import argparse
 import sys
 from pathlib import Path
@@ -50,10 +48,8 @@ def main():
     
     args = parser.parse_args()
     
-    # Setup logging
     setup_logging(level=args.log_level)
     
-    # Load configuration
     try:
         config = load_config(args.config)
         set_random_seeds(config["random_seed"])
@@ -61,7 +57,6 @@ def main():
         print(f"Error loading configuration: {e}", file=sys.stderr)
         sys.exit(1)
     
-    # Get input text
     if args.text:
         input_text = args.text
     elif not sys.stdin.isatty():
@@ -74,14 +69,12 @@ def main():
         print("Error: No input text provided", file=sys.stderr)
         sys.exit(1)
     
-    # Initialize pipeline
     try:
         pipeline = ArabicNLPPipeline(config)
     except Exception as e:
         print(f"Error initializing pipeline: {e}", file=sys.stderr)
         sys.exit(1)
     
-    # Process text
     try:
         if args.entities_only:
             entities = pipeline.extract_entities_only(input_text)

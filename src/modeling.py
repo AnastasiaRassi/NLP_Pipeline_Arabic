@@ -17,22 +17,15 @@ logger = get_logger(__name__)
 
 
 class ArabicNER:
-    """Arabic Named Entity Recognition using HuggingFace models."""
     
     def __init__(self, config: Dict):
-        """Initialize NER model.
-        
-        Args:
-            config: Configuration dictionary containing model settings.
-        """
         self.config = config
         self.model_name = config["model"]["name"]
         self.token= os.getenv("HUGGINGFACE_TOKEN")
         self.aggregation_strategy = config["model"]["aggregation_strategy"]
         self._load_model()
     
-    def _load_model(self) -> None:
-        """Load NER model and tokenizer."""
+    def _load_model(self) -> None:   # load NER model and tokenizer
         logger.info(f"Loading NER model: {self.model_name}")
         try:
             tokenizer_kwargs = {"token": self.token} if self.token else {}
@@ -53,15 +46,7 @@ class ArabicNER:
             logger.error(f"Failed to load NER model: {e}")
             raise
     
-    def extract_entities(self, text: str) -> List[Dict[str, str]]:
-        """Extract named entities from text.
-        
-        Args:
-            text: Preprocessed Arabic text.
-            
-        Returns:
-            List of entity dictionaries with 'word' and 'label' keys.
-        """
+    def extract_entities(self, text: str):
         if not text:
             logger.warning("Empty text provided for NER")
             return []
@@ -75,23 +60,14 @@ class ArabicNER:
             logger.error(f"NER extraction failed: {e}")
             raise
     
-    def _clean_entities(self, ner_results: List[Dict]) -> List[Dict[str, str]]:
-        """Clean and format NER results.
-        
-        Args:
-            ner_results: Raw NER results from pipeline.
-            
-        Returns:
-            Cleaned entity list.
-        """
+    def _clean_entities(self, ner_results: List[Dict]):
         cleaned_results = []
         
         for entity in ner_results:
             word = entity["word"].replace("##", "")
             
-            # Handle wordpiece tokenization artifacts
-            if cleaned_results and word.startswith(" "):
-                cleaned_results[-1]["word"] += word
+            if cleaned_results and word.startswith(" "):     
+                cleaned_results[-1]["word"] += word 
             else:
                 cleaned_results.append({
                     "word": word,
@@ -101,15 +77,8 @@ class ArabicNER:
         return cleaned_results
 
 
-class EmbeddingGenerator:
-    """Generate embeddings for extracted entities."""
-    
+class EmbeddingGenerator:    
     def __init__(self, config: Dict):
-        """Initialize embedding generator.
-        
-        Args:
-            config: Configuration dictionary containing embedding settings.
-        """
         self.config = config
         self.word2vec_config = config["embeddings"]["word2vec"]
         self.pca_config = config["embeddings"]["pca"]
@@ -120,15 +89,6 @@ class EmbeddingGenerator:
         entities: List[Dict[str, str]],
         apply_pca: bool = True
     ) -> Tuple[np.ndarray, Optional[np.ndarray], Optional[PCA]]:
-        """Generate embeddings for entities.
-        
-        Args:
-            entities: List of entity dictionaries.
-            apply_pca: Whether to apply PCA dimensionality reduction.
-            
-        Returns:
-            Tuple of (raw_embeddings, reduced_embeddings, pca_model).
-        """
         if not entities:
             logger.warning("No entities provided for embedding generation")
             return np.array([]), None, None
@@ -136,8 +96,7 @@ class EmbeddingGenerator:
         entity_words = [entity["word"] for entity in entities]
         logger.info(f"Generating embeddings for {len(entity_words)} entities")
         
-        # Train Word2Vec model
-        # Note: Training on a single sentence is not ideal, but maintained for compatibility
+        # Train Word2Vec model (Training on a single sentence is not ideal, but maintained for compatibility)
         model = Word2Vec(
             sentences=[entity_words],
             vector_size=self.word2vec_config["vector_size"],
@@ -147,7 +106,6 @@ class EmbeddingGenerator:
             seed=self.word2vec_config["seed"]
         )
         
-        # Extract word vectors
         word_vectors = []
         valid_entities = []
         for entity in entity_words:
@@ -162,7 +120,6 @@ class EmbeddingGenerator:
         word_vectors = np.array(word_vectors)
         logger.info(f"Generated {len(word_vectors)} valid word vectors")
         
-        # Apply PCA if set to True
         reduced_vectors = None
         pca_model = None
         
