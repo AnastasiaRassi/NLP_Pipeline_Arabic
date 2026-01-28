@@ -123,7 +123,7 @@ The system extracts named entities from Arabic text and generates vector represe
 
 ## Limitations
 
-1. **Word2Vec Training**: Current implementation trains Word2Vec on single-sentence entity lists, which is suboptimal. For production use, consider pre-trained Arabic embeddings or training on larger corpora.
+1. **Word2Vec Training**: Current implementation trains Word2Vec on single-sentence entity lists. For production use, consider pre-trained Arabic embeddings or training on larger corpora.
 
 2. **Model Dependency**: Performance depends on the underlying NER model (`hatmimoha/arabic-ner`). Model quality varies by domain and dialect.
 
